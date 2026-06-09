@@ -1,0 +1,6 @@
+{
+  "name": "Super Mario Classic",
+  "description": "Retro Super Mario Classic styled platformer game with a cyberpunk Resistance hacker console, local Room/SQLCipher secure database, and Gemini Chat Oracle integration.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
