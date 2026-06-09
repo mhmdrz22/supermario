@@ -9,6 +9,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -414,6 +415,14 @@ fun MarioStartScreen(viewModel: MarioViewModel) {
     ) {
         // 1. Fully immersive full-screen responsive retro-arcade vector background
         RetroArcadeStartBackground()
+
+        // Cyber Resistance Poster Image from user proposal
+        AsyncImage(
+            model = "https://i.ebayimg.com/images/g/OvoAAOSwoKJkVhB5/s-l1600.webp",
+            contentDescription = "Cyber Resistance Poster",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
+        )
 
         // 2. Translucent dark overlay with gradient mask at the bottom for absolute readability of controls
         Box(
