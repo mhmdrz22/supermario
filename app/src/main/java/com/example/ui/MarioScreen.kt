@@ -56,6 +56,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.withTransform
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.input.pointer.pointerInput
@@ -421,9 +422,9 @@ fun MarioStartScreen(viewModel: MarioViewModel) {
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(
+                            Color.Black.copy(alpha = 0.35f),
                             Color.Black.copy(alpha = 0.25f),
-                            Color.Black.copy(alpha = 0.15f),
-                            Color.Black.copy(alpha = 0.85f)
+                            Color.Black.copy(alpha = 0.88f)
                         )
                     )
                 )
@@ -433,33 +434,33 @@ fun MarioStartScreen(viewModel: MarioViewModel) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 24.dp, vertical = 32.dp),
+                .padding(horizontal = 20.dp, vertical = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Arcade Header Title with neon shadows, scaled gracefully
+            // Arcade Cyber Header Title with neon shadows, scaled gracefully
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(top = 28.dp)
+                modifier = Modifier.padding(top = 20.dp)
             ) {
                 Text(
                     text = "SUPER MARIO",
-                    fontSize = 46.sp,
+                    fontSize = 42.sp,
                     fontWeight = FontWeight.Black,
                     fontFamily = FontFamily.Monospace,
-                    color = Color(0xFFF43F5E), // Modern vibrant rose-red
+                    color = Color(0xFF00FF66), // Cyber Resistance Neon Green
                     textAlign = TextAlign.Center,
                     modifier = Modifier.shadow(16.dp)
                 )
                 Text(
-                    text = "ARCADE COMPOSE 2026",
-                    fontSize = 13.sp,
+                    text = "► CYBER RESISTANCE TERMINAL v2.6 ◄",
+                    fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.Monospace,
-                    letterSpacing = 3.sp,
-                    color = Color(0xFFFBBF24), // Vibrant gold
+                    letterSpacing = 2.sp,
+                    color = Color(0xFF10B981), // Resistance Emerald Green
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(top = 4.dp)
+                    modifier = Modifier.padding(top = 6.dp)
                 )
             }
 
@@ -471,18 +472,39 @@ fun MarioStartScreen(viewModel: MarioViewModel) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.Black.copy(alpha = 0.35f), RoundedCornerShape(16.dp))
-                    .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.08f)), RoundedCornerShape(16.dp))
-                    .padding(16.dp)
+                    .background(Color(0xFF090812).copy(alpha = 0.85f), RoundedCornerShape(18.dp))
+                    .border(BorderStroke(1.5.dp, Color(0xFF10B981).copy(alpha = 0.9f)), RoundedCornerShape(18.dp))
+                    .padding(18.dp)
             ) {
+                // Cyber status command text
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "SYS_STATUS: READY",
+                        color = Color(0xFF34D399),
+                        fontSize = 10.sp,
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "BYPASS_CORE: ONLINE",
+                        color = Color(0xFF34D399),
+                        fontSize = 10.sp,
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
                 Text(
-                    text = "SELECT LEVEL STAGE",
-                    color = Color.White.copy(alpha = 0.9f),
+                    text = "CHOOSE SECTOR TARGET",
+                    color = Color.White.copy(alpha = 0.95f),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.Monospace,
-                    letterSpacing = 1.5.sp,
-                    modifier = Modifier.padding(bottom = 14.dp)
+                    letterSpacing = 1.8.sp,
+                    modifier = Modifier.padding(bottom = 12.dp)
                 )
 
                 Row(
@@ -500,18 +522,18 @@ fun MarioStartScreen(viewModel: MarioViewModel) {
                                 .background(
                                     if (isSel) {
                                         Brush.verticalGradient(
-                                            colors = listOf(Color(0xFFF43F5E), Color(0xFFBE123C))
+                                            colors = listOf(Color(0xFF059669), Color(0xFF047857))
                                         )
                                     } else {
                                         Brush.verticalGradient(
-                                            colors = listOf(Color(0xFF1E1B4B).copy(alpha = 0.65f), Color(0xFF11102D).copy(alpha = 0.85f))
+                                            colors = listOf(Color(0xFF1F2937).copy(alpha = 0.5f), Color(0xFF111827).copy(alpha = 0.7f))
                                         )
                                     }
                                 )
                                 .border(
                                     BorderStroke(
                                         if (isSel) 2.5.dp else 1.dp,
-                                        if (isSel) Color(0xFFFDA4AF) else Color.White.copy(alpha = 0.15f)
+                                        if (isSel) Color(0xFF34D399) else Color.White.copy(alpha = 0.15f)
                                     ),
                                     RoundedCornerShape(12.dp)
                                 )
@@ -520,11 +542,11 @@ fun MarioStartScreen(viewModel: MarioViewModel) {
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "WORLD 1-$num",
-                                color = if (isSel) Color.White else Color.White.copy(alpha = 0.8f),
+                                text = "SECTOR 1-$num",
+                                color = if (isSel) Color.White else Color.White.copy(alpha = 0.6f),
                                 fontFamily = FontFamily.Monospace,
                                 fontWeight = FontWeight.ExtraBold,
-                                fontSize = 12.sp
+                                fontSize = 11.sp
                             )
                         }
                     }
@@ -532,14 +554,14 @@ fun MarioStartScreen(viewModel: MarioViewModel) {
 
                 Spacer(modifier = Modifier.height(18.dp))
 
-                // Play Button: Vibrant Golden Gloss design
+                // Play Button: Vibrant Resistance Green Design
                 Button(
                     onClick = { 
                         debugClicks++
                         viewModel.startGame(selectedTab) 
                     },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFF59E0B), // Warm Amber
+                        containerColor = Color(0xFF10B981), // Resistance Green
                         contentColor = Color.Black
                     ),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp, pressedElevation = 2.dp),
@@ -556,13 +578,13 @@ fun MarioStartScreen(viewModel: MarioViewModel) {
                         Icon(
                             Icons.Default.PlayArrow, 
                             contentDescription = "PLAY", 
-                            modifier = Modifier.size(30.dp),
+                            modifier = Modifier.size(28.dp),
                             tint = Color.Black
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "INSERT COIN & PLAY",
-                            fontSize = 17.sp,
+                            text = "INITIALIZE BYPASS",
+                            fontSize = 16.sp,
                             fontWeight = FontWeight.Black,
                             fontFamily = FontFamily.Monospace,
                             letterSpacing = 0.5.sp
@@ -572,7 +594,7 @@ fun MarioStartScreen(viewModel: MarioViewModel) {
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Leaderboard viewing option: Glassmorphic outlined button
+                // Leaderboard viewing option: Glassmorphic outlined Green button
                 OutlinedButton(
                     onClick = { 
                         debugClicks++
@@ -582,17 +604,17 @@ fun MarioStartScreen(viewModel: MarioViewModel) {
                         .fillMaxWidth()
                         .height(48.dp)
                         .testTag("leaderboard_direct_btn"),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFF59E0B)),
-                    border = BorderStroke(1.2.dp, Color(0xFFF59E0B).copy(alpha = 0.6f)),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF10B981)),
+                    border = BorderStroke(1.5.dp, Color(0xFF10B981).copy(alpha = 0.7f)),
                     shape = RoundedCornerShape(14.dp)
                 ) {
-                    Icon(Icons.Default.Star, "Leaderboard", modifier = Modifier.size(20.dp))
+                    Icon(Icons.Default.Star, "Leaderboard", modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "VIEW GLOBAL RECORDS",
+                        text = "DECRYPT GLOBAL DATABASE",
                         fontFamily = FontFamily.Monospace,
                         fontWeight = FontWeight.Black,
-                        fontSize = 12.sp,
+                        fontSize = 11.sp,
                         letterSpacing = 1.sp
                     )
                 }
@@ -601,8 +623,8 @@ fun MarioStartScreen(viewModel: MarioViewModel) {
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
                         text = "Touch Registered - Click Count: $debugClicks",
-                        color = Color(0xFF10B981), // Emerald green
-                        fontSize = 12.sp,
+                        color = Color(0xFF00FF66), // Cyber Neon green
+                        fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Monospace,
                         textAlign = TextAlign.Center
@@ -1233,6 +1255,7 @@ fun CanvasView(viewModel: MarioViewModel) {
     Canvas(
         modifier = Modifier
             .fillMaxSize()
+            .graphicsLayer()
             .testTag("mario_canvas")
     ) {
         val logicalHeight = 448f

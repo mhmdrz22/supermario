@@ -1176,6 +1176,8 @@ class MarioViewModel(application: Application) : AndroidViewModel(application) {
                 for (col in 55..62) {
                     levelGrid[8][col] = if (col % 2 == 0) TILE_QUESTION_COIN else TILE_BRICK
                 }
+                // Star Reward block high up!
+                levelGrid[4][60] = TILE_QUESTION_STAR
 
                 // Pyramid staircase of solid blocks before flagpole
                 for (h in 1..4) {
@@ -1229,13 +1231,13 @@ class MarioViewModel(application: Application) : AndroidViewModel(application) {
                     if (c % 15 == 0) levelGrid[2][c] = TILE_QUESTION_COIN
                 }
 
-                // Block bridges over pits
+                // Block bridges over pits with premium Star and Mushroom rewards!
                 levelGrid[8][32] = TILE_BRICK
-                levelGrid[8][33] = TILE_QUESTION_MUSHROOM
+                levelGrid[8][33] = TILE_QUESTION_STAR
                 levelGrid[8][34] = TILE_BRICK
 
                 levelGrid[8][100] = TILE_SOLID
-                levelGrid[8][101] = TILE_SOLID
+                levelGrid[8][101] = TILE_QUESTION_MUSHROOM
                 levelGrid[8][102] = TILE_SOLID
 
                 // Coins floating
@@ -1268,33 +1270,36 @@ class MarioViewModel(application: Application) : AndroidViewModel(application) {
             }
             3 -> {
                 // World 1-3 Bowser's Castle Fireworld Theme
-                // Massive lava pits (very wide gaps!)
+                // Optimized, continuous, and fully navigable lava pits (never exceeding comfortable 3-tile gaps)
+                val pits = (15..20) + (42..47) + (75..80) + (110..115) + (143..148)
                 for (c in 0 until tileCols) {
-                    if (c in 15..22 || c in 42..50 || c in 75..84 || c in 110..120 || c in 143..152) {
+                    if (c in pits) {
                         levelGrid[12][c] = TILE_EMPTY
                         levelGrid[13][c] = TILE_EMPTY
                     }
                 }
 
-                // High single platform bricks over gaps
-                for (c in 17..20) levelGrid[8][c] = TILE_BRICK
+                // Comfortable single platform bricks over first pit (15..20)
+                for (c in 17..19) levelGrid[8][c] = TILE_BRICK
                 levelGrid[8][18] = TILE_QUESTION_MUSHROOM
 
-                for (c in 44..48) levelGrid[7][c] = TILE_SOLID
-                levelGrid[6][46] = TILE_COIN
+                // Stepping platforms over second pit (42..47)
+                for (c in 44..45) levelGrid[7][c] = TILE_SOLID
+                levelGrid[6][45] = TILE_COIN
 
-                // Extremely tight single brick stands
-                levelGrid[8][77] = TILE_SOLID
-                levelGrid[6][80] = TILE_QUESTION_FLOWER
-                levelGrid[8][83] = TILE_SOLID
+                // Stepping stones over third pit (75..80) with a premium GLOWING STAR block in the middle!
+                levelGrid[8][76] = TILE_SOLID
+                levelGrid[6][78] = TILE_QUESTION_STAR // Starman bypass logic!
+                levelGrid[8][79] = TILE_SOLID
 
-                for (c in 112..118 step 2) {
+                // Stepping stones over fourth pit (110..115)
+                for (c in 111..114 step 2) {
                     levelGrid[8][c] = TILE_BRICK
                     levelGrid[5][c + 1] = TILE_COIN
                 }
 
-                // Stepping stones for final 143..152 gap
-                for (c in 145..150 step 2) {
+                // Stepping stones for final pit (143..148)
+                for (c in 144..147 step 2) {
                     levelGrid[8][c] = TILE_SOLID
                     levelGrid[5][c] = TILE_COIN
                 }
