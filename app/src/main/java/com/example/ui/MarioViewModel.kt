@@ -493,11 +493,11 @@ class MarioViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
 
-        // Apply variable gravity based on whether jump button is held down
+        // Apply variable gravity based on whether jump button is held down (extremely smooth parabolic trajectory)
         val gravityForce = if (isJumpPressed && marioVy.value < 0f) {
-            if (isSuperCharged || isStarman.value) 0.26f else 0.36f
+            if (isSuperCharged || isStarman.value) 0.22f else 0.28f
         } else {
-            0.56f
+            0.48f
         }
         marioVy.value += gravityForce
         if (marioVy.value > 14f) {
@@ -509,9 +509,9 @@ class MarioViewModel(application: Application) : AndroidViewModel(application) {
             marioVy.value = -2.0f
         }
 
-        // Apply Jump (with visual and physical power injection from stats)
+        // Apply Jump (with visual and physical power injection from stats to easily reach high blocks)
         if (isJumpPressed && isGrounded.value) {
-            val jumpImpulse = if (isSuperCharged) -12.5f else if (isStarman.value) -11.5f else -10.5f
+            val jumpImpulse = if (isSuperCharged) -16.5f else if (isStarman.value) -15.5f else -13.5f
             marioVy.value = jumpImpulse
             isGrounded.value = false
             if (isSuperCharged) {
@@ -522,8 +522,8 @@ class MarioViewModel(application: Application) : AndroidViewModel(application) {
         // Apply X movement and horizontal collisions
         marioX.value += marioVx.value
 
-        // Stay within screen bounds: cannot walk off the left of the current screen view!
-        val screenMinX = cameraX.value
+        // Stay within screen bounds: can walk backward with zero clipping!
+        val screenMinX = 0f
         if (marioX.value < screenMinX) {
             marioX.value = screenMinX
             marioVx.value = 0f
@@ -540,13 +540,11 @@ class MarioViewModel(application: Application) : AndroidViewModel(application) {
             triggerPlayerDeath()
         }
 
-        // Classic Super Mario scroll: only scroll right, never scroll left!
+        // Decoupled camera coordinate matrix allowing pleasant bidirectional scrolling!
         val targetCam = marioX.value - 180f
         val maxCam = (tileCols * tileSize) - 400f
         val idealCam = max(0f, min(targetCam, maxCam))
-        if (idealCam > cameraX.value) {
-            cameraX.value = idealCam
-        }
+        cameraX.value = idealCam
     }
 
     private fun triggerPlayerDeath() {

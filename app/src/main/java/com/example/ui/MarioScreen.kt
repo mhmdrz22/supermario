@@ -653,486 +653,127 @@ fun MarioGameView(viewModel: MarioViewModel) {
     val worldValue by remember { derivedStateOf { viewModel.selectedWorld.value } }
     val timeValue by remember { derivedStateOf { viewModel.timeRemaining.value } }
 
-    Column(
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFF07070F))
     ) {
-        // HUD / Scoreboard (Retro Arcade Cabinet Header)
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color(0xFF14141F))
-                .padding(vertical = 12.dp, horizontal = 16.dp)
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+        val isLandscape = maxWidth > maxHeight
+
+        if (isLandscape) {
+            // LANDSCAPE: Panoramic fullscreen gaming layout with transparent, comfortable side controllers
+            Box(modifier = Modifier.fillMaxSize()) {
+                // Background game canvas fills full viewport
+                CanvasView(viewModel = viewModel)
+
+                // Compact, modern premium semi-transparent HUD overlay at the top
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFF14141F).copy(alpha = 0.85f))
+                        .padding(vertical = 8.dp, horizontal = 24.dp)
                 ) {
-                    // Mario Score column
-                    Column {
-                        Text(
-                            text = "MARIO",
-                            fontSize = 11.sp,
-                            fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.Bold,
-                            color = RedRetro
-                        )
-                        Text(
-                            text = scoreValue.toString().padStart(6, '0'),
-                            fontSize = 15.sp,
-                            fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
-                    }
-
-                    // Coins count
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = "COINS",
-                            fontSize = 11.sp,
-                            fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.Bold,
-                            color = YellowRetro
-                        )
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(
-                                modifier = Modifier
-                                    .size(8.dp)
-                                    .background(YellowRetro, CircleShape)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = "x${coinsValue.toString().padStart(2, '0')}",
-                                fontSize = 15.sp,
-                                fontFamily = FontFamily.Monospace,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White
-                            )
-                        }
-                    }
-
-                    // World Indicator
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = "WORLD",
-                            fontSize = 11.sp,
-                            fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
-                        Text(
-                            text = "1-$worldValue",
-                            fontSize = 15.sp,
-                            fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
-                    }
-
-                    // Remaining Time
-                    Column(horizontalAlignment = Alignment.End) {
-                        Text(
-                            text = "TIME",
-                            fontSize = 11.sp,
-                            fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF00FFCC)
-                        )
-                        Text(
-                            text = timeValue.toString().padStart(3, '0'),
-                            fontSize = 15.sp,
-                            fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
-                    }
-
-                    // Lives
-                    Column(horizontalAlignment = Alignment.End) {
-                        Text(
-                            text = "LIVES",
-                            fontSize = 11.sp,
-                            fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.Bold,
-                            color = LightGreenRetro
-                        )
-                        Text(
-                            text = "x$livesValue",
-                            fontSize = 15.sp,
-                            fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
-                    }
-                }
-
-                // Indicators Bar (P-Meter & Starman mode!)
-                val pVal = viewModel.pMeter.value
-                val starActive = viewModel.isStarman.value
-                val isSuperCharged = pVal >= 100f
-
-                if (pVal > 0f || starActive) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // P-Meter Gauge
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = "P-METER: ",
-                                fontSize = 10.sp,
-                                fontFamily = FontFamily.Monospace,
-                                fontWeight = FontWeight.Bold,
-                                color = if (isSuperCharged) Color(0xFFFFD700) else Color.LightGray
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            // Draw block bars
-                            val filledBlocks = (pVal / 10f).toInt()
-                            repeat(10) { i ->
-                                val active = i < filledBlocks
-                                Box(
-                                    modifier = Modifier
-                                        .size(width = 8.dp, height = 10.dp)
-                                        .padding(horizontal = 1.dp)
-                                        .background(
-                                            if (active) {
-                                                if (isSuperCharged) Color(0xFFFFD700) else Color(0xFFFF5555)
-                                            } else {
-                                                Color(0xFF33334F)
-                                            }
-                                        )
-                                )
-                            }
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = if (isSuperCharged) "⚡ SPRINT MAX!" else ">>>",
-                                fontSize = 9.sp,
-                                fontFamily = FontFamily.Monospace,
-                                fontWeight = FontWeight.Black,
-                                color = if (isSuperCharged) Color(0xFFFFD700) else Color.Red
-                            )
+                        // Score
+                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(text = "MARIO", fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, color = RedRetro)
+                            Text(text = scoreValue.toString().padStart(6, '0'), fontSize = 12.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, color = Color.White)
                         }
 
-                        // Starman Active text
-                        if (starActive) {
-                            val flashColor = if ((System.currentTimeMillis() / 150) % 2 == 0L) Color(0xFFFFD700) else Color(0xFFEC4899)
-                            Text(
-                                text = "★ INVINCIBLE STARMAN ★",
-                                fontSize = 10.sp,
-                                fontFamily = FontFamily.Monospace,
-                                fontWeight = FontWeight.ExtraBold,
-                                color = flashColor
-                            )
+                        // Coins
+                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Text(text = "COINS", fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, color = YellowRetro)
+                            Box(modifier = Modifier.size(6.dp).background(YellowRetro, CircleShape))
+                            Text(text = "x${coinsValue.toString().padStart(2, '0')}", fontSize = 12.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, color = Color.White)
+                        }
+
+                        // World indicator
+                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(text = "WORLD", fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, color = Color.White)
+                            Text(text = "1-$worldValue", fontSize = 12.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, color = Color.White)
+                        }
+
+                        // Remaining Time
+                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(text = "TIME", fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, color = Color(0xFF00FFCC))
+                            Text(text = timeValue.toString().padStart(3, '0'), fontSize = 12.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, color = Color.White)
+                        }
+
+                        // Lives count
+                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(text = "LIVES", fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, color = LightGreenRetro)
+                            Text(text = "x$livesValue", fontSize = 12.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, color = Color.White)
                         }
                     }
                 }
-            }
-        }
 
-        // Interactive Game Play Area (Scrollable platform graphics canvas)
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1.3f)
-                .background(Color(0xFF1A1A2E))
-        ) {
-            CanvasView(viewModel = viewModel)
-
-            // Sleek floating Pause & Home (Exit) buttons in top-right
-            Row(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(
-                    onClick = { viewModel.togglePause() },
-                    modifier = Modifier
-                        .size(36.dp)
-                        .background(Color.Black.copy(alpha = 0.6f), CircleShape)
-                        .border(BorderStroke(1.dp, Color(0xFFFBBF24).copy(alpha = 0.6f)), CircleShape)
-                        .testTag("btn_pause")
-                ) {
-                    Icon(
-                        imageVector = if (status == GameStatus.PAUSED) Icons.Default.PlayArrow else Icons.Default.Refresh,
-                        contentDescription = "Pause",
-                        tint = Color(0xFFFBBF24),
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
-
-                IconButton(
-                    onClick = { viewModel.exitToMain() },
-                    modifier = Modifier
-                        .size(36.dp)
-                        .background(Color.Black.copy(alpha = 0.6f), CircleShape)
-                        .border(BorderStroke(1.dp, Color(0xFFF43F5E).copy(alpha = 0.6f)), CircleShape)
-                        .testTag("btn_exit")
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Home, 
-                        contentDescription = "Exit", 
-                        tint = Color(0xFFF43F5E),
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
-            }
-
-            // Overlays: Pause, Game Over, Victory
-            if (status == GameStatus.PAUSED) {
+                // D-Pad Left & Right Floating Panel in the bottom-left corner with high hit areas
                 Box(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.5f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "PAUSED",
-                        color = Color.White,
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.Monospace,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
-
-            if (status == GameStatus.GAME_OVER) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.75f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = "GAME OVER",
-                            color = RedRetro,
-                            fontSize = 32.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            fontFamily = FontFamily.Monospace
-                        )
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Text(
-                            text = "Score: ${scoreValue}",
-                            color = Color.White,
-                            fontSize = 16.sp,
-                            fontFamily = FontFamily.Monospace
-                        )
-                        Spacer(modifier = Modifier.height(20.dp))
-                        Button(
-                            onClick = { viewModel.startGame(worldValue) },
-                            colors = ButtonDefaults.buttonColors(containerColor = YellowRetro, contentColor = Color.Black)
-                        ) {
-                            Text("TRY AGAIN", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-                        }
-                    }
-                }
-            }
-
-            if (status == GameStatus.VICTORY_SCORING) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.8f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(20.dp)
-                    ) {
-                        Text(
-                            text = "STAGE CLEAR!",
-                            color = LightGreenRetro,
-                            fontSize = 28.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            fontFamily = FontFamily.Monospace
-                        )
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Text(
-                            text = "TIME BONUS RECORD: ${timeValue} sec",
-                            color = Color.White,
-                            fontSize = 14.sp,
-                            fontFamily = FontFamily.Monospace
-                        )
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Text(
-                            text = "TOTAL SCORE: ${scoreValue}",
-                            color = YellowRetro,
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily.Monospace
-                        )
-
-                        Spacer(modifier = Modifier.height(24.dp))
-
-                        // Score Submission initials
-                        Text(
-                            text = "ENTER PLAYER INITIALS",
-                            color = Color.White.copy(alpha = 0.7f),
-                            fontSize = 11.sp,
-                            fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.Bold
-                        )
-
-                        OutlinedTextField(
-                            value = viewModel.playerNameInput.value,
-                            onValueChange = { viewModel.playerNameInput.value = it.take(3).uppercase() },
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = YellowRetro,
-                                unfocusedBorderColor = Color.White.copy(alpha = 0.2f),
-                                focusedTextColor = Color.White,
-                                unfocusedTextColor = Color.White
-                            ),
-                            textStyle = LocalTextStyle.current.copy(
-                                textAlign = TextAlign.Center,
-                                fontFamily = FontFamily.Monospace,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold
-                            ),
-                            singleLine = true,
-                            maxLines = 1,
-                            modifier = Modifier
-                                .width(120.dp)
-                                .height(56.dp)
-                                .padding(vertical = 4.dp)
-                                .testTag("playerNameInput"),
-                            keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Characters)
-                        )
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        Button(
-                            onClick = { viewModel.saveScoreAndEnterLeaderboard() },
-                            colors = ButtonDefaults.buttonColors(containerColor = YellowRetro, contentColor = Color.Black),
-                            modifier = Modifier.testTag("saveScoreBtn")
-                        ) {
-                            Text("SAVE SCORE", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-                        }
-                    }
-                }
-            }
-        }
-
-        // Onscreen NES Controller Panel for mobile playability
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            Color(0xFF14121E), // Premium deep graphite slate
-                            Color(0xFF1D1B2D), // Rich high-tech carbon velvet
-                            Color(0xFF0C0A12)  // Deep edge-tone shadow black
-                        )
-                    )
-                )
-                .border(BorderStroke(1.5.dp, Color(0xFF3B335C).copy(alpha = 0.95f)))
-                .padding(bottom = 20.dp, top = 16.dp, start = 16.dp, end = 16.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Classic D-PAD Left & Right (Big, responsive, and wide for perfect touch capture)
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .background(Color(0xFF0F0E18), RoundedCornerShape(20.dp))
+                        .align(Alignment.BottomStart)
+                        .padding(start = 24.dp, bottom = 24.dp)
+                        .background(Color(0xFF0F0E18).copy(alpha = 0.65f), RoundedCornerShape(20.dp))
+                        .border(BorderStroke(1.dp, Color(0xFF312E4F).copy(alpha = 0.5f)), RoundedCornerShape(20.dp))
                         .padding(8.dp)
-                        .border(BorderStroke(1.dp, Color(0xFF312E4F)), RoundedCornerShape(20.dp))
-                ) {
-                    // LEFT key
-                    PressingButton(
-                        onPressed = { viewModel.isLeftPressed = it },
-                        modifier = Modifier
-                            .size(width = 78.dp, height = 60.dp)
-                            .border(BorderStroke(2.dp, Color(0xFF6366F1)), RoundedCornerShape(16.dp))
-                            .testTag("dpad_left"),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF181532), contentColor = Color.White)
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                            contentDescription = "Left",
-                            tint = Color(0xFF818CF8),
-                            modifier = Modifier.size(38.dp)
-                        )
-                    }
-
-                    // RIGHT key
-                    PressingButton(
-                        onPressed = { viewModel.isRightPressed = it },
-                        modifier = Modifier
-                            .size(width = 78.dp, height = 60.dp)
-                            .border(BorderStroke(2.dp, Color(0xFF6366F1)), RoundedCornerShape(16.dp))
-                            .testTag("dpad_right"),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF181532), contentColor = Color.White)
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                            contentDescription = "Right",
-                            tint = Color(0xFF818CF8),
-                            modifier = Modifier.size(38.dp)
-                        )
-                    }
-                }
-
-                // Mid-Console Branding Decor (Elegant Retro Arcade Deck branding plate)
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Box(
+                        PressingButton(
+                            onPressed = { viewModel.isLeftPressed = it },
                             modifier = Modifier
-                                .size(6.dp)
-                                .background(Color(0xFFEF4444), CircleShape) // Power indicator glow
-                        )
-                        Text(
-                            text = "NES-80",
-                            fontSize = 11.sp,
-                            fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = Color(0xFFEF4444),
-                            letterSpacing = 1.sp
-                        )
+                                .size(width = 80.dp, height = 64.dp)
+                                .border(BorderStroke(2.dp, Color(0xFF6366F1).copy(alpha = 0.8f)), RoundedCornerShape(16.dp))
+                                .testTag("dpad_left"),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF181532).copy(alpha = 0.8f), contentColor = Color.White)
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                                contentDescription = "Left",
+                                tint = Color(0xFF818CF8),
+                                modifier = Modifier.size(36.dp)
+                            )
+                        }
+
+                        PressingButton(
+                            onPressed = { viewModel.isRightPressed = it },
+                            modifier = Modifier
+                                .size(width = 80.dp, height = 64.dp)
+                                .border(BorderStroke(2.dp, Color(0xFF6366F1).copy(alpha = 0.8f)), RoundedCornerShape(16.dp))
+                                .testTag("dpad_right"),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF181532).copy(alpha = 0.8f), contentColor = Color.White)
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                contentDescription = "Right",
+                                tint = Color(0xFF818CF8),
+                                modifier = Modifier.size(36.dp)
+                            )
+                        }
                     }
-                    Text(
-                        text = "CLASSIC DECK",
-                        fontSize = 7.sp,
-                        fontFamily = FontFamily.Monospace,
-                        color = Color.White.copy(alpha = 0.4f),
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.5.sp
-                    )
                 }
 
-                // Action buttons arranged with authentic retro SLANTED diagonal layouts
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
+                // Action A & B circle buttons floating in bottom-right corner
+                Box(
                     modifier = Modifier
-                        .background(Color(0xFF0F0E18), RoundedCornerShape(20.dp))
+                        .align(Alignment.BottomEnd)
+                        .padding(end = 24.dp, bottom = 24.dp)
+                        .background(Color(0xFF0F0E18).copy(alpha = 0.65f), RoundedCornerShape(20.dp))
+                        .border(BorderStroke(1.dp, Color(0xFF312E4F).copy(alpha = 0.5f)), RoundedCornerShape(20.dp))
                         .padding(8.dp)
-                        .border(BorderStroke(1.dp, Color(0xFF312E4F)), RoundedCornerShape(20.dp))
                 ) {
-                    // ACTION B button (Fireball / Sprint) - Cherry Red, slanted lower
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.offset(y = 8.dp)
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(14.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
+                        // Action B (Run/Fire)
                         PressingButton(
                             onPressed = {
                                 if (it) {
@@ -1143,60 +784,715 @@ fun MarioGameView(viewModel: MarioViewModel) {
                                 }
                             },
                             modifier = Modifier
-                                .size(62.dp)
-                                .border(BorderStroke(2.5.dp, Color(0xFFFDA4AF)), CircleShape)
+                                .size(60.dp)
+                                .border(BorderStroke(2.5.dp, Color(0xFFFDA4AF).copy(alpha = 0.8f)), CircleShape)
                                 .testTag("btn_action_b"),
                             shape = CircleShape,
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFBE123C), contentColor = Color.White)
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFBE123C).copy(alpha = 0.8f), contentColor = Color.White)
                         ) {
-                            Text(
-                                text = "B",
-                                fontSize = 24.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White,
-                                fontFamily = FontFamily.Monospace
-                            )
+                            Text("B", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White, fontFamily = FontFamily.Monospace)
                         }
-                        Text(
-                            text = "RUN/FIRE",
-                            fontSize = 8.sp,
-                            fontFamily = FontFamily.Monospace,
-                            color = Color.White.copy(alpha = 0.5f),
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(top = 4.dp)
-                        )
-                    }
 
-                    // ACTION A button (Jump) - Rose Gold Magenta, slanted higher
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.offset(y = (-8).dp)
-                    ) {
+                        // Action A (Jump)
                         PressingButton(
                             onPressed = { viewModel.isJumpPressed = it },
                             modifier = Modifier
-                                .size(62.dp)
-                                .border(BorderStroke(2.5.dp, Color(0xFFFCA5A5)), CircleShape)
+                                .size(60.dp)
+                                .border(BorderStroke(2.5.dp, Color(0xFFFCA5A5).copy(alpha = 0.8f)), CircleShape)
                                 .testTag("btn_action_a"),
                             shape = CircleShape,
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE11D48), contentColor = Color.White)
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE11D48).copy(alpha = 0.8f), contentColor = Color.White)
                         ) {
-                            Text(
-                                text = "A",
-                                fontSize = 24.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White,
-                                fontFamily = FontFamily.Monospace
+                            Text("A", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White, fontFamily = FontFamily.Monospace)
+                        }
+                    }
+                }
+
+                // Mid-Console branding floated subtly in the bottom center
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 12.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    Text(text = "▼ DUAL SHIFT MODE ▼", fontSize = 9.sp, fontFamily = FontFamily.Monospace, color = Color(0xFFEF4444).copy(alpha = 0.8f), fontWeight = FontWeight.ExtraBold)
+                    Text(text = "REDMI PORT STABILIZED", fontSize = 7.sp, fontFamily = FontFamily.Monospace, color = Color.White.copy(alpha = 0.35f))
+                }
+
+                // Floating Pause & Home (Exit) buttons in top-right with standard offset
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(top = 56.dp, end = 24.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(
+                        onClick = { viewModel.togglePause() },
+                        modifier = Modifier
+                            .size(36.dp)
+                            .background(Color.Black.copy(alpha = 0.65f), CircleShape)
+                            .border(BorderStroke(1.dp, Color(0xFFFBBF24).copy(alpha = 0.7f)), CircleShape)
+                            .testTag("btn_pause")
+                    ) {
+                        Icon(
+                            imageVector = if (status == GameStatus.PAUSED) Icons.Default.PlayArrow else Icons.Default.Refresh,
+                            contentDescription = "Pause",
+                            tint = Color(0xFFFBBF24),
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+
+                    IconButton(
+                        onClick = { viewModel.exitToMain() },
+                        modifier = Modifier
+                            .size(36.dp)
+                            .background(Color.Black.copy(alpha = 0.65f), CircleShape)
+                            .border(BorderStroke(1.dp, Color(0xFFF43F5E).copy(alpha = 0.7f)), CircleShape)
+                            .testTag("btn_exit")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Home, 
+                            contentDescription = "Exit", 
+                            tint = Color(0xFFF43F5E),
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
+
+                // Playback overlays (PAUSE, GAME OVER, VICTORY) centering perfect on Screen
+                if (status == GameStatus.PAUSED) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.5f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "PAUSED", color = Color.White, fontSize = 32.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                    }
+                }
+
+                if (status == GameStatus.GAME_OVER) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.75f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(text = "GAME OVER", color = RedRetro, fontSize = 36.sp, fontWeight = FontWeight.ExtraBold, fontFamily = FontFamily.Monospace)
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Text(text = "Score: ${scoreValue}", color = Color.White, fontSize = 18.sp, fontFamily = FontFamily.Monospace)
+                            Spacer(modifier = Modifier.height(20.dp))
+                            Button(
+                                onClick = { viewModel.startGame(worldValue) },
+                                colors = ButtonDefaults.buttonColors(containerColor = YellowRetro, contentColor = Color.Black)
+                            ) {
+                                Text("TRY AGAIN", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+                }
+
+                if (status == GameStatus.VICTORY_SCORING) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.85f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.padding(20.dp)
+                        ) {
+                            Text(text = "STAGE CLEAR!", color = LightGreenRetro, fontSize = 32.sp, fontWeight = FontWeight.ExtraBold, fontFamily = FontFamily.Monospace)
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Text(text = "TIME BONUS RECORD: ${timeValue} sec", color = Color.White, fontSize = 16.sp, fontFamily = FontFamily.Monospace)
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(text = "TOTAL SCORE: ${scoreValue}", color = YellowRetro, fontSize = 22.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+
+                            Spacer(modifier = Modifier.height(20.dp))
+
+                            Text(text = "ENTER PLAYER INITIALS", color = Color.White.copy(alpha = 0.7f), fontSize = 11.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+
+                            OutlinedTextField(
+                                value = viewModel.playerNameInput.value,
+                                onValueChange = { viewModel.playerNameInput.value = it.take(3).uppercase() },
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = YellowRetro,
+                                    unfocusedBorderColor = Color.White.copy(alpha = 0.2f),
+                                    focusedTextColor = Color.White,
+                                    unfocusedTextColor = Color.White
+                                ),
+                                textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center, fontFamily = FontFamily.Monospace, fontSize = 18.sp, fontWeight = FontWeight.Bold),
+                                singleLine = true,
+                                maxLines = 1,
+                                modifier = Modifier
+                                    .width(120.dp)
+                                    .height(56.dp)
+                                    .padding(vertical = 4.dp)
+                                    .testTag("playerNameInput"),
+                                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Characters)
+                            )
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            Button(
+                                onClick = { viewModel.saveScoreAndEnterLeaderboard() },
+                                colors = ButtonDefaults.buttonColors(containerColor = YellowRetro, contentColor = Color.Black),
+                                modifier = Modifier.testTag("saveScoreBtn")
+                            ) {
+                                Text("SAVE SCORE", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            // PORTRAIT: Adaptive columnar layouts with dedicated controllers panel at the bottom margin
+            Column(modifier = Modifier.fillMaxSize()) {
+                // HUD / Scoreboard (Retro Arcade Cabinet Header)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFF14141F))
+                        .padding(vertical = 12.dp, horizontal = 16.dp)
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            // Mario Score column
+                            Column {
+                                Text(
+                                    text = "MARIO",
+                                    fontSize = 11.sp,
+                                    fontFamily = FontFamily.Monospace,
+                                    fontWeight = FontWeight.Bold,
+                                    color = RedRetro
+                                )
+                                Text(
+                                    text = scoreValue.toString().padStart(6, '0'),
+                                    fontSize = 15.sp,
+                                    fontFamily = FontFamily.Monospace,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
+                            }
+
+                            // Coins count
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    text = "COINS",
+                                    fontSize = 11.sp,
+                                    fontFamily = FontFamily.Monospace,
+                                    fontWeight = FontWeight.Bold,
+                                    color = YellowRetro
+                                )
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(8.dp)
+                                            .background(YellowRetro, CircleShape)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = "x${coinsValue.toString().padStart(2, '0')}",
+                                        fontSize = 15.sp,
+                                        fontFamily = FontFamily.Monospace,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White
+                                    )
+                                }
+                            }
+
+                            // World Indicator
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    text = "WORLD",
+                                    fontSize = 11.sp,
+                                    fontFamily = FontFamily.Monospace,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
+                                Text(
+                                    text = "1-$worldValue",
+                                    fontSize = 15.sp,
+                                    fontFamily = FontFamily.Monospace,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
+                            }
+
+                            // Remaining Time
+                            Column(horizontalAlignment = Alignment.End) {
+                                Text(
+                                    text = "TIME",
+                                    fontSize = 11.sp,
+                                    fontFamily = FontFamily.Monospace,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF00FFCC)
+                                )
+                                Text(
+                                    text = timeValue.toString().padStart(3, '0'),
+                                    fontSize = 15.sp,
+                                    fontFamily = FontFamily.Monospace,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
+                            }
+
+                            // Lives
+                            Column(horizontalAlignment = Alignment.End) {
+                                Text(
+                                    text = "LIVES",
+                                    fontSize = 11.sp,
+                                    fontFamily = FontFamily.Monospace,
+                                    fontWeight = FontWeight.Bold,
+                                    color = LightGreenRetro
+                                )
+                                Text(
+                                    text = "x$livesValue",
+                                    fontSize = 15.sp,
+                                    fontFamily = FontFamily.Monospace,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
+                            }
+                        }
+
+                        // Indicators Bar (P-Meter & Starman mode!)
+                        val pVal = viewModel.pMeter.value
+                        val starActive = viewModel.isStarman.value
+                        val isSuperCharged = pVal >= 100f
+
+                        if (pVal > 0f || starActive) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                // P-Meter Gauge
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        text = "P-METER: ",
+                                        fontSize = 10.sp,
+                                        fontFamily = FontFamily.Monospace,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (isSuperCharged) Color(0xFFFFD700) else Color.LightGray
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    // Draw block bars
+                                    val filledBlocks = (pVal / 10f).toInt()
+                                    repeat(10) { i ->
+                                        val active = i < filledBlocks
+                                        Box(
+                                            modifier = Modifier
+                                                .size(width = 8.dp, height = 10.dp)
+                                                .padding(horizontal = 1.dp)
+                                                .background(
+                                                    if (active) {
+                                                        if (isSuperCharged) Color(0xFFFFD700) else Color(0xFFFF5555)
+                                                    } else {
+                                                        Color(0xFF33334F)
+                                                    }
+                                                )
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = if (isSuperCharged) "⚡ SPRINT MAX!" else ">>>",
+                                        fontSize = 9.sp,
+                                        fontFamily = FontFamily.Monospace,
+                                        fontWeight = FontWeight.Black,
+                                        color = if (isSuperCharged) Color(0xFFFFD700) else Color.Red
+                                    )
+                                }
+
+                                // Starman Active text
+                                if (starActive) {
+                                    val flashColor = if ((System.currentTimeMillis() / 150) % 2 == 0L) Color(0xFFFFD700) else Color(0xFFEC4899)
+                                    Text(
+                                        text = "★ INVINCIBLE STARMAN ★",
+                                        fontSize = 10.sp,
+                                        fontFamily = FontFamily.Monospace,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = flashColor
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Interactive Game Play Area (Scrollable platform graphics canvas)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1.3f)
+                        .background(Color(0xFF1A1A2E))
+                ) {
+                    CanvasView(viewModel = viewModel)
+
+                    // Sleek floating Pause & Home (Exit) buttons in top-right
+                    Row(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IconButton(
+                            onClick = { viewModel.togglePause() },
+                            modifier = Modifier
+                                .size(36.dp)
+                                .background(Color.Black.copy(alpha = 0.6f), CircleShape)
+                                .border(BorderStroke(1.dp, Color(0xFFFBBF24).copy(alpha = 0.6f)), CircleShape)
+                                .testTag("btn_pause")
+                        ) {
+                            Icon(
+                                imageVector = if (status == GameStatus.PAUSED) Icons.Default.PlayArrow else Icons.Default.Refresh,
+                                contentDescription = "Pause",
+                                tint = Color(0xFFFBBF24),
+                                modifier = Modifier.size(18.dp)
                             )
                         }
-                        Text(
-                            text = "JUMP",
-                            fontSize = 8.sp,
-                            fontFamily = FontFamily.Monospace,
-                            color = Color.White.copy(alpha = 0.5f),
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(top = 4.dp)
+
+                        IconButton(
+                            onClick = { viewModel.exitToMain() },
+                            modifier = Modifier
+                                .size(36.dp)
+                                .background(Color.Black.copy(alpha = 0.6f), CircleShape)
+                                .border(BorderStroke(1.dp, Color(0xFFF43F5E).copy(alpha = 0.6f)), CircleShape)
+                                .testTag("btn_exit")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Home, 
+                                contentDescription = "Exit", 
+                                tint = Color(0xFFF43F5E),
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
+
+                    // Overlays: Pause, Game Over, Victory
+                    if (status == GameStatus.PAUSED) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Black.copy(alpha = 0.5f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "PAUSED",
+                                color = Color.White,
+                                fontSize = 28.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = FontFamily.Monospace,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+
+                    if (status == GameStatus.GAME_OVER) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Black.copy(alpha = 0.75f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    text = "GAME OVER",
+                                    color = RedRetro,
+                                    fontSize = 32.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    fontFamily = FontFamily.Monospace
+                                )
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Text(
+                                    text = "Score: ${scoreValue}",
+                                    color = Color.White,
+                                    fontSize = 16.sp,
+                                    fontFamily = FontFamily.Monospace
+                                )
+                                Spacer(modifier = Modifier.height(20.dp))
+                                Button(
+                                    onClick = { viewModel.startGame(worldValue) },
+                                    colors = ButtonDefaults.buttonColors(containerColor = YellowRetro, contentColor = Color.Black)
+                                ) {
+                                    Text("TRY AGAIN", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                                }
+                            }
+                        }
+                    }
+
+                    if (status == GameStatus.VICTORY_SCORING) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Black.copy(alpha = 0.8f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.padding(20.dp)
+                            ) {
+                                Text(
+                                    text = "STAGE CLEAR!",
+                                    color = LightGreenRetro,
+                                    fontSize = 28.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    fontFamily = FontFamily.Monospace
+                                )
+                                Spacer(modifier = Modifier.height(12.dp))
+                                Text(
+                                    text = "TIME BONUS RECORD: ${timeValue} sec",
+                                    color = Color.White,
+                                    fontSize = 14.sp,
+                                    fontFamily = FontFamily.Monospace
+                                )
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text(
+                                    text = "TOTAL SCORE: ${scoreValue}",
+                                    color = YellowRetro,
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = FontFamily.Monospace
+                                )
+
+                                Spacer(modifier = Modifier.height(24.dp))
+
+                                // Score Submission initials
+                                Text(
+                                    text = "ENTER PLAYER INITIALS",
+                                    color = Color.White.copy(alpha = 0.7f),
+                                    fontSize = 11.sp,
+                                    fontFamily = FontFamily.Monospace,
+                                    fontWeight = FontWeight.Bold
+                                )
+
+                                OutlinedTextField(
+                                    value = viewModel.playerNameInput.value,
+                                    onValueChange = { viewModel.playerNameInput.value = it.take(3).uppercase() },
+                                    colors = OutlinedTextFieldDefaults.colors(
+                                        focusedBorderColor = YellowRetro,
+                                        unfocusedBorderColor = Color.White.copy(alpha = 0.2f),
+                                        focusedTextColor = Color.White,
+                                        unfocusedTextColor = Color.White
+                                    ),
+                                    textStyle = LocalTextStyle.current.copy(
+                                        textAlign = TextAlign.Center,
+                                        fontFamily = FontFamily.Monospace,
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.Bold
+                                    ),
+                                    singleLine = true,
+                                    maxLines = 1,
+                                    modifier = Modifier
+                                        .width(120.dp)
+                                        .height(56.dp)
+                                        .padding(vertical = 4.dp)
+                                        .testTag("playerNameInput"),
+                                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Characters)
+                                )
+
+                                Spacer(modifier = Modifier.height(12.dp))
+
+                                Button(
+                                    onClick = { viewModel.saveScoreAndEnterLeaderboard() },
+                                    colors = ButtonDefaults.buttonColors(containerColor = YellowRetro, contentColor = Color.Black),
+                                    modifier = Modifier.testTag("saveScoreBtn")
+                                ) {
+                                    Text("SAVE SCORE", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Onscreen NES Controller Panel for mobile playability
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    Color(0xFF14121E), // Premium deep graphite slate
+                                    Color(0xFF1D1B2D), // Rich high-tech carbon velvet
+                                    Color(0xFF0C0A12)  // Deep edge-tone shadow black
+                                )
+                            )
                         )
+                        .border(BorderStroke(1.5.dp, Color(0xFF3B335C).copy(alpha = 0.95f)))
+                        .padding(bottom = 20.dp, top = 16.dp, start = 16.dp, end = 16.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Classic D-PAD Left & Right (Big, responsive, and wide for perfect touch capture)
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .background(Color(0xFF0F0E18), RoundedCornerShape(20.dp))
+                                .padding(8.dp)
+                                .border(BorderStroke(1.dp, Color(0xFF312E4F)), RoundedCornerShape(20.dp))
+                        ) {
+                            // LEFT key
+                            PressingButton(
+                                onPressed = { viewModel.isLeftPressed = it },
+                                modifier = Modifier
+                                    .size(width = 78.dp, height = 60.dp)
+                                    .border(BorderStroke(2.dp, Color(0xFF6366F1)), RoundedCornerShape(16.dp))
+                                    .testTag("dpad_left"),
+                                shape = RoundedCornerShape(16.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF181532), contentColor = Color.White)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                                    contentDescription = "Left",
+                                    tint = Color(0xFF818CF8),
+                                    modifier = Modifier.size(38.dp)
+                                )
+                            }
+
+                            // RIGHT key
+                            PressingButton(
+                                onPressed = { viewModel.isRightPressed = it },
+                                modifier = Modifier
+                                    .size(width = 78.dp, height = 60.dp)
+                                    .border(BorderStroke(2.dp, Color(0xFF6366F1)), RoundedCornerShape(16.dp))
+                                    .testTag("dpad_right"),
+                                shape = RoundedCornerShape(16.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF181532), contentColor = Color.White)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                    contentDescription = "Right",
+                                    tint = Color(0xFF818CF8),
+                                    modifier = Modifier.size(38.dp)
+                                )
+                            }
+                        }
+
+                        // Mid-Console Branding Decor (Elegant Retro Arcade Deck branding plate)
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(6.dp)
+                                        .background(Color(0xFFEF4444), CircleShape) // Power indicator glow
+                                )
+                                Text(
+                                    text = "NES-80",
+                                    fontSize = 11.sp,
+                                    fontFamily = FontFamily.Monospace,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = Color(0xFFEF4444),
+                                    letterSpacing = 1.sp
+                                )
+                            }
+                            Text(
+                                text = "CLASSIC DECK",
+                                fontSize = 7.sp,
+                                fontFamily = FontFamily.Monospace,
+                                color = Color.White.copy(alpha = 0.4f),
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 1.5.sp
+                            )
+                        }
+
+                        // Action buttons arranged with authentic retro SLANTED diagonal layouts
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .background(Color(0xFF0F0E18), RoundedCornerShape(20.dp))
+                                .padding(8.dp)
+                                .border(BorderStroke(1.dp, Color(0xFF312E4F)), RoundedCornerShape(20.dp))
+                        ) {
+                            // ACTION B button (Fireball / Sprint) - Cherry Red, slanted lower
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.offset(y = 8.dp)
+                            ) {
+                                PressingButton(
+                                    onPressed = {
+                                        if (it) {
+                                            viewModel.isSprintPressed = true
+                                            viewModel.fireAction()
+                                        } else {
+                                            viewModel.isSprintPressed = false
+                                        }
+                                    },
+                                    modifier = Modifier
+                                        .size(62.dp)
+                                        .border(BorderStroke(2.5.dp, Color(0xFFFDA4AF)), CircleShape)
+                                        .testTag("btn_action_b"),
+                                    shape = CircleShape,
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFBE123C), contentColor = Color.White)
+                                ) {
+                                    Text(
+                                        text = "B",
+                                        fontSize = 24.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White,
+                                        fontFamily = FontFamily.Monospace
+                                    )
+                                }
+                                Text(
+                                    text = "RUN/FIRE",
+                                    fontSize = 8.sp,
+                                    fontFamily = FontFamily.Monospace,
+                                    color = Color.White.copy(alpha = 0.5f),
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(top = 4.dp)
+                                )
+                            }
+
+                            // ACTION A button (Jump) - Rose Gold Magenta, slanted higher
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.offset(y = (-8).dp)
+                            ) {
+                                PressingButton(
+                                    onPressed = { viewModel.isJumpPressed = it },
+                                    modifier = Modifier
+                                        .size(62.dp)
+                                        .border(BorderStroke(2.5.dp, Color(0xFFFCA5A5)), CircleShape)
+                                        .testTag("btn_action_a"),
+                                    shape = CircleShape,
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE11D48), contentColor = Color.White)
+                                ) {
+                                    Text(
+                                        text = "A",
+                                        fontSize = 24.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White,
+                                        fontFamily = FontFamily.Monospace
+                                    )
+                                }
+                                Text(
+                                    text = "JUMP",
+                                    fontSize = 8.sp,
+                                    fontFamily = FontFamily.Monospace,
+                                    color = Color.White.copy(alpha = 0.5f),
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(top = 4.dp)
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -1215,33 +1511,21 @@ fun PressingButton(
 ) {
     var isDown by remember { mutableStateOf(false) }
     val scale = if (isDown) 0.88f else 1.0f
-    val containerColor = if (isDown) colors.containerColor.copy(alpha = 0.8f) else colors.containerColor
+    val containerColor = if (isDown) colors.containerColor.copy(alpha = 0.85f) else colors.containerColor
 
     Box(
         modifier = modifier
             .scale(scale)
+            .clip(shape)
             .background(containerColor, shape)
             .pointerInput(onPressed) {
-                awaitPointerEventScope {
-                    while (true) {
-                        val event = awaitPointerEvent()
-                        val changes = event.changes
-                        // Touch Capture Lock: Track finger press status with zero-latency.
-                        // Stay pressed as long as the touch is held down anywhere, allowing comfortable slider play!
-                        val firstChange = changes.firstOrNull()
-                        if (firstChange != null) {
-                            val currentlyPressed = firstChange.pressed
-                            if (currentlyPressed != isDown) {
-                                isDown = currentlyPressed
-                                onPressed(currentlyPressed)
-                            }
-                        } else {
-                            if (isDown) {
-                                isDown = false
-                                onPressed(false)
-                            }
-                        }
-                    }
+                awaitEachGesture {
+                    awaitFirstDown(requireUnconsumed = false)
+                    isDown = true
+                    onPressed(true)
+                    waitForUpOrCancellation()
+                    isDown = false
+                    onPressed(false)
                 }
             },
         contentAlignment = Alignment.Center
